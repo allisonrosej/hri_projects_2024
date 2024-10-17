@@ -38,7 +38,7 @@
 
 import rospy
 #from std_msgs.msg import String
-from week0.msg   import week0msg
+from week0.msg  import week0msg
 
 def callback(data):
    

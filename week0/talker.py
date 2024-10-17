@@ -23,7 +23,7 @@
 # LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
 # FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
 # COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,ss
 # BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
 # LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
@@ -37,22 +37,24 @@
 ## to the 'chatter' topic
 
 import rospy
-from week0.msg import week0msg
+from week0.msg import week0msg  # Ensure this message type is correctly defined
 
 def talker():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
+    pub = rospy.Publisher('chatter', week0msg, queue_size=10)
     rospy.init_node('talker', anonymous=True)
-    rate = rospy.Rate(10) # 10hz
-    while not rospy.is_shutdown():
+    rate = rospy.Rate(10)  # 10hz
+
     
-    #Random strings
-    message = week0msg()   
-    message.x = 5
-    message.y = 10
-    message.z = 15
-        hello_str = "hello world %s" % rospy.get_time()
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
+        # Create a new message instance
+        message = week0msg()
+        message.x = 10
+        message.y = 15
+        message.z = 20
+        
+        # Log and publish the message
+        while not rospy.is_shutdown():
+        rospy.loginfo(message)
+        pub.publish(message)
         rate.sleep()
 
 if __name__ == '__main__':
@@ -60,3 +62,4 @@ if __name__ == '__main__':
         talker()
     except rospy.ROSInterruptException:
         pass
+

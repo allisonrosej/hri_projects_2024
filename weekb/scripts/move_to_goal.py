@@ -1,9 +1,12 @@
-#!/usr/bin/env 
+#!/usr/bin/env python3
 
 import rospy
 from geometry_msgs.msg import Twist
 from people_msgs.msg import People
 import math
+
+# Publisher for cmd_vel
+pub = None  # Initialize globally so that it can be used in move_to_goal
 
 def move_to_goal(goal_x, goal_y):
     """

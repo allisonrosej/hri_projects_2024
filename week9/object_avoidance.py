@@ -2,79 +2,67 @@
 import rospy
 from geometry_msgs.msg import Twist
 from sensor_msgs.msg import LaserScan
+from std_msgs.msg import Float32  
 
 class RobotController:
     def __init__(self):
-        # Initialize the node
+        # Initialize the ROS node
         rospy.init_node('robot_controller', anonymous=True)
         
-        # Publisher to send velocity commands
+        # Publishers and subscribers
         self.velocity_publisher = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
-        
-        # Subscriber to read LaserScan data
         self.laser_subscriber = rospy.Subscriber('/scan', LaserScan, self.laser_callback)
+        self.person_subscriber = rospy.Subscriber('/person_detected', Float32, self.person_callback)  # Replace Float32 with actual message type
         
-        # Create a Twist message for movement
+        # Movement command and state variables
         self.move_cmd = Twist()
-        
-        # Flags to control movement
         self.obstacle_detected = False
-        self.person_detected_direction = None  # Stores direction towards detected person (left, right, center)
-        
-        # Set the rate of the loop
-        self.rate = rospy.Rate(10)  # 10 Hz
+        self.person_direction = None  # Angle in radians to the detected person
+        self.rate = rospy.Rate(10)
 
     def laser_callback(self, data):
-        # Process the laser scan data to detect obstacles and the person location
-        front_distance = min(min(data.ranges[0:30]), min(data.ranges[330:359]))  # Front obstacles
-        left_distance = min(data.ranges[30:89])  # Left side obstacles
-        right_distance = min(data.ranges[270:329])  # Right side obstacles
+        """
+        Callback for LaserScan data. Detects obstacles within a threshold distance.
+        """
+        # Filter valid ranges and find the minimum distance
+        valid_ranges = [r for r in data.ranges if r != float('Inf') and r != float('NaN')]
+        min_distance = min(valid_ranges, default=float('Inf'))
+        self.obstacle_detected = min_distance < 0.5  # Threshold for obstacle detection
 
-        # Set obstacle detection flag
-        self.obstacle_detected = front_distance < 0.5
-        
-        # Set direction towards person based on sensor data (simulate person detection)
-        if right_distance < 1.5:
-            self.person_detected_direction = 'right'
-        elif left_distance < 1.5:
-            self.person_detected_direction = 'left'
-        else:
-            self.person_detected_direction = 'center'
+    def person_callback(self, data):
+        """
+        Callback for person detection. Updates the direction of the detected person.
+        """
+        self.person_direction = data.data  # Assuming the data is the angle in radians
 
-    def move_to_person(self):
-        # Move the robot towards the person unless an obstacle is detected
+    def move_toward_person(self):
+        """
+        Main control loop to move the robot toward the detected person while avoiding obstacles.
+        """
         while not rospy.is_shutdown():
             if self.obstacle_detected:
-                # Stop moving forward and turn slightly to avoid the obstacle
+                # If an obstacle is detected, stop and rotate to find a clear path
+                rospy.loginfo("Obstacle detected! Avoiding...")
                 self.move_cmd.linear.x = 0.0
-                if self.person_detected_direction == 'right':
-                    self.move_cmd.angular.z = -0.5  # Turn right
-                elif self.person_detected_direction == 'left':
-                    self.move_cmd.angular.z = 0.5  # Turn left
-                else:
-                    self.move_cmd.angular.z = 0.3  # Turn slightly if unclear
+                self.move_cmd.angular.z = 0.5  # Rotate in place
+            elif self.person_direction is not None:
+                # If a person is detected, align and move toward them
+                rospy.loginfo(f"Person detected at angle {self.person_direction:.2f} radians. Moving toward...")
+                self.move_cmd.linear.x = 0.2  # Move forward at constant speed
+                self.move_cmd.angular.z = -0.5 * self.person_direction  # Adjust angle
             else:
-                # Move forward and adjust direction towards the person
-                self.move_cmd.linear.x = 0.2  # Move forward
-                if self.person_detected_direction == 'right':
-                    self.move_cmd.angular.z = -0.3  # Turn towards right
-                elif self.person_detected_direction == 'left':
-                    self.move_cmd.angular.z = 0.3  # Turn towards left
-                else:
-                    self.move_cmd.angular.z = 0.0  # Go straight
+                # If no person is detected, stop the robot
+                rospy.loginfo("No person detected. Stopping...")
+                self.move_cmd.linear.x = 0.0
+                self.move_cmd.angular.z = 0.0
 
-            # Publish the movement command
+            # Publish the velocity command
             self.velocity_publisher.publish(self.move_cmd)
-            
-            # Sleep to maintain loop rate
             self.rate.sleep()
 
 if __name__ == '__main__':
     try:
         controller = RobotController()
-        controller.move_to_person()
+        controller.move_toward_person()
     except rospy.ROSInterruptException:
         pass
-
-
-

@@ -6,7 +6,7 @@ import math
 def move_square():
     rospy.init_node('move_square', anonymous=True)
     pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(1)  # 1 Hz
+    rate = rospy.Rate(10)  # 1 Hz
 
     move_cmd = Twist()
     linear_speed = 1.5  # m/s
@@ -44,7 +44,7 @@ def move_square():
 def move_figure_eight():
     rospy.init_node('move_figure_eight', anonymous=True)
     pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(1)
+    rate = rospy.Rate(10)
 
     move_cmd = Twist()
 
@@ -68,7 +68,7 @@ def move_figure_eight():
 def move_triangle():
     rospy.init_node('move_triangle', anonymous=True)
     pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
-    rate = rospy.Rate(1)
+    rate = rospy.Rate(10)
 
     move_cmd = Twist()
     linear_speed = 1.5  # m/s

@@ -1,3 +1,24 @@
+#  how to compile file #
+#In the first terminal
+# source ~/hri2024/devel/setup.bash
+#roslaunch week2 nao_sim.launch
+
+#In second terminal:
+#source ~/hri2024/devel/setup.bash
+#rosrun rviz rviz
+
+#In the third terminal:
+#source ~/hri2024/devel/setup.bash
+#rosrun joint_state_publisher_gui joint_state_publisher_gui
+
+#In the fourth terminal:
+#source ~/hri2024/devel/setup.bash
+#
+#roslaunch ros_vosk ros_vosk.launch
+
+# In fifth terminal:
+# run python3 speech_generation.py
+
 import rospy
 from std_msgs.msg import String
 import vosk

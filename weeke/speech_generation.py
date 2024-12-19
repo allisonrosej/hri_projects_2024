@@ -1,4 +1,4 @@
-#  how to compile file #
+#  how to run file #
 #In the first terminal
 # source ~/hri2024/devel/setup.bash
 #roslaunch week2 nao_sim.launch
